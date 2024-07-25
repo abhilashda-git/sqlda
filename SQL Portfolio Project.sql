@@ -24,7 +24,7 @@ order by amount_spent desc;
 
 select sum(amount) from cc_transactions; */
 
---1. write a query to print top 5 cities with highest spends and their percentage contribution of total credit card spends
+--Below is the query to print top 5 cities with highest spends and their percentage contribution of total credit card spends
 select top 5 cct.city, 
 SUM(cct.amount) as spend,
 tot_spend.total_spend,
@@ -34,7 +34,7 @@ inner join (select sum(cast (amount as bigint)) as total_spend from cc_transacti
 group by city, tot_spend.total_spend
 order by spend DESC;
 
---2. write a query to print highest spend month and amount spent in that month for each card type
+--Below is the query to print highest spend month and amount spent in that month for each card type
 
 select * from 
 (
@@ -48,7 +48,7 @@ MONTH(transaction_date)
 )a 
 where a.rn = 1;
 
---3. write a query to print the transaction details(all columns from the table) for each card type when
+--Below is the query to print the transaction details(all columns from the table) for each card type when
 --it reaches a cumulative of 1000000 total spends(We should have 4 rows in the o/p one for each card type)
 with cum_sum AS
 (
@@ -80,7 +80,7 @@ from reahces_million
 where rn = 1;
 
 
---4. write a query to find city which had lowest percentage spend for gold card type
+--Below is the query to find city which had lowest percentage spend for gold card type
 
 --Analysis 1 - dividing gold amount for that city to the total spend amount of that city -  sum(gold_amount in hyd)/sum(goldamount in hyd+sliveramount in hyd+platinum_amount in hyd)
 
@@ -132,7 +132,7 @@ inner join total_spend on 1=1
 )A
 where A.rk=1;
 
---5. write a query to print 3 columns:  city, highest_expense_type , lowest_expense_type (example format : Delhi , bills, Fuel)
+--Below is the query to print 3 columns:  city, highest_expense_type , lowest_expense_type (example format : Delhi , bills, Fuel)
 
 --Analysis 1:
 
@@ -150,9 +150,25 @@ min(case when highest_expense = 1 then exp_type end) as high_exp_type
 from cte
 group by city;
 
+--Analysis 2
+
+with cte as 
+(
+select city, exp_type, SUM(amount) as spend,
+DENSE_RANK() OVER(partition by city order by SUM(amount)) lowest_expense,
+DENSE_RANK() OVER(partition by city order by sum(amount) desc) highest_expense
+from cc_transactions
+group by city, exp_type
+)
+select city, 
+max(case when lowest_expense = 1 then exp_type end) as low_exp_type,
+max(case when highest_expense = 1 then exp_type end) as high_exp_type
+from cte
+group by city;
 
 
---6. write a query to find percentage contribution of spends by females for each expense type
+
+--Below is the query to find percentage contribution of spends by females for each expense type
 
 --Solution 1:
 select exp_type,
@@ -180,7 +196,7 @@ from female_spend
 inner join total_spend on female_spend.exp_type=total_spend.exp_type
 order by percentage_contribution_female desc;
 
---7. which card and expense type combination saw highest month over month growth in Jan-2014
+--Below is the query to fetch card and expense type combination saw highest month over month growth in Jan-2014
 --Analysis 1: based on the mom change
 
 with cte as
